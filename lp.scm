@@ -6,7 +6,7 @@
 ;;; function which will extract the scheme blocks from a markdown file and
 ;;; evaluate them, so you can use it like you would "load".
 
-(define (load-literate filename)
+(define (load-literate filename #!optional environment)
   (define (extract-fenced-blocks filename)
     (define (main-reader line lines)
       (cond ((string=? line "```scheme") (cons scheme-block-reader     lines))
@@ -29,12 +29,15 @@
                 (let ((result (reader line lines)))
                   (loop (car result) (read-line p) (cdr result))))))))
 
-  (call-with-input-string
-    (apply string-append (extract-fenced-blocks filename))
-    (lambda (p)
-      (let loop ((sexpr     (read p))
-                 (rtn-value (if #f #t)))
-        (if (eof-object? sexpr)
-          rtn-value
-          (loop (read p)
-                (eval sexpr system-global-environment) ))))))
+  (let ((environment (if (default-object? environment)
+                         (current-load-environment)
+                         (->environment environment))))
+    (call-with-input-string
+      (apply string-append (extract-fenced-blocks filename))
+      (lambda (p)
+        (let loop ((sexpr     (read p environment))
+                   (rtn-value (if #f #t)))
+          (if (eof-object? sexpr)
+            rtn-value
+            (loop (read p environment)
+                  (eval sexpr environment) )))))))
