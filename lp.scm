@@ -37,4 +37,4 @@
         (if (eof-object? sexpr)
           rtn-value
           (loop (read p)
-                (eval (read p) system-global-environment) ))))))
+                (eval sexpr system-global-environment) ))))))
