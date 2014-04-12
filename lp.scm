@@ -19,16 +19,15 @@
       (cond ((string=? line "```")       (cons main-reader             lines))
             (else                        (cons scheme-block-reader     (cons line lines)))))
 
-    (let ((p (open-input-file filename)))
-      (let loop ((reader main-reader)
-                 (line   (read-line p))
-                 (lines  (list)))
-        (if (eof-object? line)
-              (begin
-                 (close-input-port p)
-                 (reverse lines))
-              (let ((result (reader line lines)))
-                (loop (car result) (read-line p) (cdr result)))))))
+    (call-with-input-file filename
+      (lambda (p)
+        (let loop ((reader main-reader)
+                   (line   (read-line p))
+                   (lines  (list)))
+          (if (eof-object? line)
+                (reverse lines)
+                (let ((result (reader line lines)))
+                  (loop (car result) (read-line p) (cdr result))))))))
 
   (call-with-input-string
     (apply string-append (extract-fenced-blocks filename))
