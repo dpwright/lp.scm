@@ -16,8 +16,13 @@
       (cond ((string=? line "```")       (cons main-reader             lines))
             (else                        (cons non-scheme-block-reader lines))))
     (define (scheme-block-reader line lines)
+      (define (strip-comments line)
+        (let ((idx (string-find-next-char line #\;)))
+          (if idx (substring line 0 idx) line)))
+
       (cond ((string=? line "```")       (cons main-reader             lines))
-            (else                        (cons scheme-block-reader     (cons line lines)))))
+            (else                        (cons scheme-block-reader
+                                               (cons (strip-comments line) lines)))))
 
     (call-with-input-file filename
       (lambda (p)
