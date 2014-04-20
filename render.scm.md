@@ -438,7 +438,7 @@ LaTeX boilerplate:
     (define (write-latex-document p)
       (display
         (string "\\documentclass[border=1]{standalone}"
-                "\\usepackage{amsmath}"
+                "\\usepackage{amsmath,amsthm,amssymb}"
                 "\\begin{document}"
                 src
                 "\\end{document}") p))
