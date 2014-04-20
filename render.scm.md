@@ -399,7 +399,7 @@ image, and the filename to output to:
   (define (process-latex src img)
 ```
 
-The LaTeX processor in particular has two requirements: 
+The LaTeX processor in particular has two requirements:
 
  * A LaTeX installation (including `pdflatex`)
  * A program to convert `pdf` files to `png`
