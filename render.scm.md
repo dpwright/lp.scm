@@ -86,6 +86,9 @@ are as follows:
 
   * Make a parser\* macro parse-delimited-block to replace parse-latex-block
   * Add support for graphs/diagrams with Python's matplotlib
+  * Deal properly with the final latex block (breaks unless there is a
+    non-markup bang somewhere between there and the end of the file at the
+    moment)
 
 Parser combinators
 -------------------------
