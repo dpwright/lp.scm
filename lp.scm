@@ -41,9 +41,15 @@
     (call-with-input-string
       (apply string-append (extract-fenced-blocks filename))
       (lambda (p)
-        (let loop ((sexpr     (read p environment))
-                   (rtn-value (if #f #t)))
-          (if (eof-object? sexpr)
-            rtn-value
-            (loop (read p environment)
-                  (eval sexpr environment) )))))))
+        (with-load-environment environment
+          (lambda ()
+            (with-eval-unit
+              (pathname->uri (->pathname (string (working-directory-pathname)
+                                                 filename)))
+              (lambda ()
+                (let loop ((sexpr     (read p environment))
+                           (rtn-value (if #f #t)))
+                  (if (eof-object? sexpr)
+                    rtn-value
+                    (loop (read p environment)
+                          (eval sexpr environment) )))))))))))
