@@ -51,6 +51,17 @@ enabled, which can be done using `load-option`:
 (load-option 'synchronous-subprocess)
 ```
 
+Due to some quirks involving the way MIT Scheme compiles its `*parser` language,
+I've extracted parts of this tutorial into a separate file which we load here.
+The contents of this file will be included inline as well, so you can pretty
+much ignore the following include.
+
+```scheme
+(with-working-directory-pathname
+  (directory-pathname (current-load-pathname))
+  (lambda () (load "parser-macros.scm")))
+```
+
 The module exports a single procedure, `lp/render`.  Everything else is defined
 within this procedure to avoid cluttering up the namespace with utility
 functions.
@@ -274,7 +285,7 @@ procedure.
 > above, but it doesn't work at present.  When it does, I will rewrite the above
 > explanation.
 
-```scheme
+```
   (define-*parser-macro (delimited-block delimiter type)
       `(seq #\[ ,delimiter
             (values ,type)
@@ -283,7 +294,9 @@ procedure.
                       (seq (char ,delimiter)
                            (not-char #\])) )))
             ,delimiter #\]))
+```
 
+```scheme
   (define parse-latex-block (*parser (delimited-block #\$ 'latex)))
   (define parse-dot-block   (*parser (delimited-block #\. 'dot)))
 ```
