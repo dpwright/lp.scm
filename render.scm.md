@@ -263,8 +263,8 @@ it and fail, causing the whole parser to fail and stop processing the file.
 What we actually want is simply to skip to the next `!` character in this
 situation.
 
-An aside: generalising the `parse-latex-block` parser
------------------------------------------------------
+Generalising the `parse-latex-block` parser
+-------------------------------------------
 
 We are likely to want to support more than just embedded LaTeX.  It would be
 nice to embed graphs or other generated images in the file as well.  We could
@@ -275,30 +275,64 @@ to a single procedure which takes a delimiter and a type (`$` and `'latex` in
 the above case), and parses a block of that type.  We could then alternate
 between these using `alt`.
 
-Parser-language provides a method to do this in the form of [parser-language macros][plm],
-and future versions of this module will use exactly this functionality to create
-a `parse-delimited-block` macro.  Unfortunately, I haven't managed to get that
-working yet, so for now we will continue to use the `parse-latex-block`
-procedure.
-
-> Note: The following is my attempt to define a \*parser macro as described
-> above, but it doesn't work at present.  When it does, I will rewrite the above
-> explanation.
+Parser-language provides a method to do this in the form of [parser-language macros][plm].
+Here we define such a macro which generalises the `parse-latex-block` procedure
+described above to parse any block, given the identifying delimiter and a label
+representing the type of the block.
 
 ```
-  (define-*parser-macro (delimited-block delimiter type)
-      `(seq #\[ ,delimiter
-            (values ,type)
-            (match
-              (* (alt (not-char ,delimiter)
-                      (seq (char ,delimiter)
-                           (not-char #\])) )))
-            ,delimiter #\]))
+(define-*parser-macro (delimited-block delimiter type)
+  `(seq #\[ ,delimiter
+        (values ,type)
+        (match
+          (* (alt (not-char ,delimiter)
+                  (seq (char ,delimiter)
+                       (not-char #\])) )))
+        ,delimiter #\]))
 ```
+
+> Note: This macro won't work unless it is defined at the top level and compiled
+> before anything that uses it.  Because of this, it is common to put macro
+> definitions like this in a separate file, `parser-macros.scm`, and then load
+> that file at the start.  In fact, that is what we have done here; the above is
+> just a reproduction of the code which is contained in `parser-macros.scm`
+> which we included at the start.
+
+At first glance, this macro looks very similar to the `parse-latex-block` we
+defined above, however there are subtle syntactic differences.  Most obviously,
+the `*parser` line is missing from the start; this is because we are not
+defining a procedure which returns a `*parser` in this case but a macro which
+can be used to build a `*parser`.  This can then be used inside a normal
+`*parser` procedure.
+
+The other obvious change is the scattering of syntax that has appeared: a `` ` ``
+mark before the `seq` expression and commas before any use of the `delimiter`
+and `type` parameters.  These are necessary because we are defining a *macro*
+here, rather than a procedure.  The macro is intended to return a list, which
+will then be run as a procedure.  The backtick says "return the following as a
+literal list, except where expressions are unquoted".  The comma is the means by
+which we "unquote" an expression; we say "replace this identifier with its
+evaluation".
+
+We can use this to re-implement `parse-latex-block` as follows:
 
 ```scheme
   (define parse-latex-block (*parser (delimited-block #\$ 'latex)))
-  (define parse-dot-block   (*parser (delimited-block #\. 'dot)))
+```
+
+Try expanding this in your head -- look at the definition of `delimited-block`
+and replace every instance of `,delimiter` with `#\$` and `,type` with `'latex`.
+You will find the result is exactly the same as the `parse-latex-block`
+procedure.
+
+The advantage of defining it this way, though, is that now when we want to
+define a new kind of block we can simply re-use the same macro.  Here are some
+definitions of parsers for Python's "matplotlib" library and Graphviz' "dot"
+renderer:
+
+```scheme
+  (define parse-matplotlib-block (*parser (delimited-block #\# 'matplotlib)))
+  (define parse-dot-block        (*parser (delimited-block #\. 'dot)))
 ```
 
 Extracting the markup
