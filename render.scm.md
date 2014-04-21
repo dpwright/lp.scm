@@ -185,7 +185,7 @@ result.  If you need it included in the parsed output you can make use of the
 `char` or `string` parsers, so `(char #\()` will match and return a `(`
 character.  We make use of this in the parser for LaTeX blocks.
 
-```scheme
+```
   (define parse-latex-block
     (*parser
       (seq #\[ #\$
@@ -269,6 +269,24 @@ and future versions of this module will use exactly this functionality to create
 a `parse-delimited-block` macro.  Unfortunately, I haven't managed to get that
 working yet, so for now we will continue to use the `parse-latex-block`
 procedure.
+
+> Note: The following is my attempt to define a \*parser macro as described
+> above, but it doesn't work at present.  When it does, I will rewrite the above
+> explanation.
+
+```scheme
+  (define-*parser-macro (delimited-block delimiter type)
+      `(seq #\[ ,delimiter
+            (values ,type)
+            (match
+              (* (alt (not-char ,delimiter)
+                      (seq (char ,delimiter)
+                           (not-char #\])) )))
+            ,delimiter #\]))
+
+  (define parse-latex-block (*parser (delimited-block #\$ 'latex)))
+  (define parse-dot-block   (*parser (delimited-block #\. 'dot)))
+```
 
 Extracting the markup
 ---------------------
