@@ -309,6 +309,7 @@ follows:
   (define extracted-markup
     (call-with-input-file filename
       (lambda (f)
+        (port/set-coding f 'utf-8)
         (extract-markup-from-buffer (input-port->parser-buffer f)))))
 ```
 

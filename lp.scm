@@ -26,6 +26,7 @@
 
     (call-with-input-file filename
       (lambda (p)
+        (port/set-coding p 'utf-8)
         (let loop ((reader main-reader)
                    (line   (read-line p))
                    (lines  (list)))
