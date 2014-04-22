@@ -33,6 +33,10 @@ markup for each image kind looks like.
 
 ![$ Some embedded \LaTeX{} including some maths: $e = mc^2$ $](img/latex.png?raw=true)
 
+### Embedded Graphviz Dot
+
+![. digraph cc { such -> WOW; render -> WOW; much -> awesome -> WOW; } .](img/dot.png?raw=true)
+
 ### Normal images work as usual
 
 ![Normal images still work](http://www.disqorse.com/uploads/monthly_02_2014/post-1-0-81204300-1393096566.jpg)
