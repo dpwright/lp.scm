@@ -53,3 +53,8 @@
                     rtn-value
                     (loop (read p environment)
                           (eval sexpr environment) )))))))))))
+
+; Load extra utilities
+(with-working-directory-pathname
+  (directory-pathname (current-load-pathname))
+  (lambda () (load-literate "render.scm.md")))

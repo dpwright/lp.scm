@@ -12,14 +12,12 @@ Since we already have the REPL open to parse and run the document we're working
 with, why not supply a simple render procedure to generate images from code
 embedded in the markdown file itself?  That is the purpose of this module.
 
-This module is written as a literate Scheme file; to make use of it you will
-need to use `lp.scm` as follows:
+This module is written as a literate Scheme file.  It is loaded automatically as
+part of `lp.scm`; to make use of it simply load `lp.scm` in the REPL.
 
-    (load "lp.scm")
-    (load-literate "render.scm.md")
-
-This will give you access to the `lp_render` procedure to render embedded LaTeX.
-For example, running this script on itself will generate the images below:
+This will give you access to the `lp_render` procedure to render extended
+markup.  For example, running this script on itself will generate the images
+below:
 
     (lp/render "render.scm.md")
 
