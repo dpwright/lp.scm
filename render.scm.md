@@ -121,7 +121,8 @@ from the `![` opening to the close of the image filename (`)`).
 ```scheme
   (define parse-extended-markup
     (*parser
-      (seq parse-latex-block
+      (seq (alt parse-latex-block
+                parse-dot-block)
            skip-whitespace
            parse-image-filename)))
 ```
@@ -428,7 +429,8 @@ Digging down a little bit, what form does the `process` procedure take?
           (src  (vector-second block))
           (img  (normalise-image-filename (vector-third  block))))
       (cond
-        ((equal? type 'latex) (process-latex src img)))))
+        ((equal? type 'latex) (process-latex src img))
+        ((equal? type 'dot)   (process-dot src img)))))
 ```
 
 This is fairly simple; we simply extract the parts we're interested in out of
@@ -553,6 +555,47 @@ procedure is complete, the temporary file is deleted.
 
 Note that the extra parenthesis here closes the scope we introduced with
 `(define (process-latex src img)` at the beginning of this section.
+
+Generating embedded graphs using Graphviz' `dot`
+------------------------------------------------
+
+Embedded graphs follow a similar pattern; first we generate a temporary file,
+then we run some utility on it to create the output image.  In this case, that
+utility is `dot`, from the Graphviz package.  We begin by opening the definition
+to our procedure and defining how to call the `dot` program.
+
+```scheme
+  (define (process-dot src img)
+    (define (run-dot dotfile outpng)
+      (run-synchronous-subprocess
+        "dot" (list dotfile "-Tpng" "-o" outpng)))
+```
+
+`dot` is a simpler tool than LaTeX, so the way we call it is slightly different.
+Instead of passing a temporary directory for it to do its work in so that we can
+clear it up later, we simply pass the input file (a temporary file we will
+generate in a moment) and the output PNG filename.  `dot` supports PNG files
+natively, so there is no need for any conversion after this.
+
+Next, we define a procedure to take the dot source which has been extracted from
+the file and pass it to `run-dot` to be processed.  Again, this procedure turns
+out to be much simpler than the LaTeX equivalent:
+
+```scheme
+    (define (gen-dot-graph f)
+      (call-with-output-file f
+        (lambda (p) (display src p)))
+      (run-dot (->namestring f) img))
+```
+
+Told you it was simple!  The concept is the same, but because we have no
+temporary files to worry about (the file into which we write the `dot` source
+will be cleared up automatically), the procedure turns out a lot simpler.  All
+that remains now is to call it in the same manner as we did with LaTeX.
+
+```scheme
+    (call-with-temporary-file-pathname gen-dot-graph))
+```
 
 Wrapping up
 -----------
