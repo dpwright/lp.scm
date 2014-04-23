@@ -76,7 +76,8 @@ functions.
 markup.  It will go through the file, looking for supported markup, and generate
 images from that markup.  Currently supported markup is:
 
- * `![$ ... $]`, where the dots represent some LaTeX code
+ * `![$ ... $]`, containing LaTeX code
+ * `![. ... .]`, containing graphviz' dot format
 
 This markup must be followed be the image filename to output in brackets (which
 has to be a `png` file).  The perspicacious reader will have noticed that this
